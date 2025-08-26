@@ -1,7 +1,10 @@
-import React from "react";
+import { PollForm } from "@/components/pollForm";
 
-const page = () => {
-  return <div>page</div>;
-};
-
-export default page;
+export default function NewPollPage() {
+  return (
+    <section>
+      <h1 className="text-2xl font-bold mb-4">Create a New Poll</h1>
+      <PollForm />
+    </section>
+  );
+}
