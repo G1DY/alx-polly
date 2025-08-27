@@ -1,22 +1,25 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+// src/app/layout.tsx
 import "./globals.css";
+import { ReactNode } from "react";
+import { Navbar } from "@/domains/shared/Navbar";
+import { Footer } from "@/domains/shared/Footer";
+import { AuthProvider } from "@/domains/auth/authProvider";
 
-const inter = Inter({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "Polling App",
-  description: "Vote on polls in real-time",
+export const metadata = {
+  title: "Pollify",
+  description: "Create polls, vote in real-time, and share instantly.",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className="min-h-screen flex flex-col bg-gray-50 text-gray-900 antialiased">
+        <AuthProvider>
+          <Navbar />
+          <main className="flex-1 container mx-auto px-4 py-6">{children}</main>
+          <Footer />
+        </AuthProvider>
+      </body>
     </html>
   );
 }
