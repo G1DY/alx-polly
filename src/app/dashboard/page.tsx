@@ -28,7 +28,7 @@ export default function DashboardPage() {
                 <li className="flex justify-between items-center">
                   Node.js (Express/NestJS)
                   <Button
-                    size="xs"
+                    size="sm"
                     variant="secondary"
                     aria-label="Vote for Node.js"
                   >
@@ -38,7 +38,7 @@ export default function DashboardPage() {
                 <li className="flex justify-between items-center">
                   Django
                   <Button
-                    size="xs"
+                    size="sm"
                     variant="secondary"
                     aria-label="Vote for Django"
                   >
@@ -48,7 +48,7 @@ export default function DashboardPage() {
                 <li className="flex justify-between items-center">
                   Laravel
                   <Button
-                    size="xs"
+                    size="sm"
                     variant="secondary"
                     aria-label="Vote for Laravel"
                   >
@@ -58,7 +58,7 @@ export default function DashboardPage() {
                 <li className="flex justify-between items-center">
                   Spring Boot
                   <Button
-                    size="xs"
+                    size="sm"
                     variant="secondary"
                     aria-label="Vote for Spring Boot"
                   >
@@ -82,7 +82,7 @@ export default function DashboardPage() {
                 <li className="flex justify-between items-center">
                   React
                   <Button
-                    size="xs"
+                    size="sm"
                     variant="secondary"
                     aria-label="Vote for React"
                   >
@@ -92,7 +92,7 @@ export default function DashboardPage() {
                 <li className="flex justify-between items-center">
                   Vue
                   <Button
-                    size="xs"
+                    size="sm"
                     variant="secondary"
                     aria-label="Vote for Vue"
                   >
@@ -102,7 +102,7 @@ export default function DashboardPage() {
                 <li className="flex justify-between items-center">
                   Angular
                   <Button
-                    size="xs"
+                    size="sm"
                     variant="secondary"
                     aria-label="Vote for Angular"
                   >
@@ -112,7 +112,7 @@ export default function DashboardPage() {
                 <li className="flex justify-between items-center">
                   Svelte
                   <Button
-                    size="xs"
+                    size="sm"
                     variant="secondary"
                     aria-label="Vote for Svelte"
                   >
@@ -136,7 +136,7 @@ export default function DashboardPage() {
                 <li className="flex justify-between items-center">
                   PostgreSQL
                   <Button
-                    size="xs"
+                    size="sm"
                     variant="secondary"
                     aria-label="Vote for PostgreSQL"
                   >
@@ -146,7 +146,7 @@ export default function DashboardPage() {
                 <li className="flex justify-between items-center">
                   MySQL
                   <Button
-                    size="xs"
+                    size="sm"
                     variant="secondary"
                     aria-label="Vote for MySQL"
                   >
@@ -156,7 +156,7 @@ export default function DashboardPage() {
                 <li className="flex justify-between items-center">
                   MongoDB
                   <Button
-                    size="xs"
+                    size="sm"
                     variant="secondary"
                     aria-label="Vote for MongoDB"
                   >
@@ -166,7 +166,7 @@ export default function DashboardPage() {
                 <li className="flex justify-between items-center">
                   SQLite
                   <Button
-                    size="xs"
+                    size="sm"
                     variant="secondary"
                     aria-label="Vote for SQLite"
                   >
