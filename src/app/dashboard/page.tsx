@@ -11,14 +11,15 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BarChart3, LayoutDashboard, PlusCircle } from "lucide-react";
-import { supabaseBrowser } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/client";
 
 export default function DashboardPage() {
   useEffect(() => {
+    const supabase = createClient();
     const getUser = async () => {
       const {
         data: { user },
-      } = await supabaseBrowser.auth.getUser();
+      } = await supabase.auth.getUser();
       console.log(user);
     };
 

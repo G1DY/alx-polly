@@ -1,57 +1,78 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { BarChart3, PlusCircle } from "lucide-react";
-import { supabaseBrowser } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 
-export function SiteNavbar() {
-  const router = useRouter();
+import { createClient } from "@/lib/supabase/client";
+import { useEffect, useState } from "react";
+import { User } from "@supabase/supabase-js";
+
+export default function SiteNavbar() {
+  const [user, setUser] = useState<User | null>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, [supabase.auth]);
 
   const handleLogout = async () => {
-    await supabaseBrowser.auth.signOut();
-    router.push("/login");
+    await supabase.auth.signOut();
+    setUser(null);
   };
 
   return (
-    <nav className="sticky top-0 z-50 flex h-14 items-center justify-between rounded-xl border border-border bg-background/80 backdrop-blur px-4 md:px_6 shadow-md">
-      <div className="flex items-center gap-2 font-bold text-lg tracking-tight">
-        <BarChart3 className="h-5 w-5 text-primary" />
-        <Link
-          href="/"
-          className="hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded"
-          aria-label="Go to home"
-        >
-          Polly
-        </Link>
-      </div>
-
-      <div className="hidden md:flex items-center gap-6">
-        <Link
-          href="/polls"
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded"
-        >
-          My Polls
-        </Link>
-        <Button asChild size="sm" className="gap-1">
-          <Link href="/polls/create" aria-label="Create a new poll">
-            <PlusCircle className="h-4 w-4" />
-            Create Poll
+    <nav className="bg-white shadow-md">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between py-4">
+          <Link href="/" className="text-2xl font-bold text-gray-800">
+            Polly
           </Link>
-        </Button>
+          <div className="flex items-center">
+            {user ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="mr-4 text-gray-600 hover:text-gray-800"
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  href="/polls/create"
+                  className="mr-4 text-gray-600 hover:text-gray-800"
+                >
+                  Create Poll
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="mr-4 text-gray-600 hover:text-gray-800"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/signup"
+                  className="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
       </div>
-
-      <button
-        type="button"
-        aria-label="Open account menu"
-        className="h-9 w-9 rounded-full bg-gradient-to-br from-primary to-primary/70 text-white grid place-items-center text-sm font-semibold shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-        onClick={handleLogout}
-      >
-        U
-      </button>
     </nav>
   );
 }
-
-
