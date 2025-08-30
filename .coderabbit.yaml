@@ -1,0 +1,19 @@
+version: 1
+review:
+  enabled: true
+  auto_review_on:
+    - pull_request
+    - push
+  rules:
+    - name: Ensure clean TypeScript code
+      description: "Check for readability, maintainability, and correct TS usage."
+      severity: medium
+    - name: Validate SQL migrations
+      description: "Check SQL files under supabase/migrations for correctness."
+      severity: high
+ignore:
+  - .env*
+  - node_modules/**
+  - .next/**
+  - supabase/.temp/**
+
