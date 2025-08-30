@@ -10,16 +10,37 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { supabaseBrowser } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsSubmitting(true);
-    // TODO: wire Supabase signInWithPassword
-    setTimeout(() => setIsSubmitting(false), 600);
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    const { error } = await supabaseBrowser.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setError(error.message);
+    } else {
+      router.push("/dashboard");
+    }
+
+    setIsSubmitting(false);
   }
 
   return (
@@ -31,6 +52,14 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <form className="grid gap-6" onSubmit={onSubmit} noValidate>
+            {error && (
+              <div
+                className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+                role="alert"
+              >
+                <span className="block sm:inline">{error}</span>
+              </div>
+            )}
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -72,18 +101,15 @@ export default function LoginPage() {
 
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 text-xs text-muted-foreground">
-                <input
-                  type="checkbox"
-                  className="h-3.5 w-3.5 rounded border-input"
-                />
+                <input type="checkbox" />
                 Remember me
               </label>
-              <a
+              <Link
                 href="/forgot-password"
                 className="text-xs hover:text-primary underline underline-offset-4"
               >
                 Forgot password?
-              </a>
+              </Link>
             </div>
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
@@ -104,15 +130,14 @@ export default function LoginPage() {
             <Button type="button" variant="secondary" className="w-full">
               Continue with GitHub
             </Button>
-
             <div className="text-xs text-muted-foreground text-center">
               Don’t have an account?{" "}
-              <a
+              <Link
                 href="/signup"
                 className="hover:text-primary underline underline-offset-4"
               >
                 Sign up
-              </a>
+              </Link>
             </div>
           </form>
         </CardContent>

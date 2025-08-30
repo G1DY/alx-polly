@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect } from "react";
 import Link from "next/link";
 import {
   Card,
@@ -8,8 +11,20 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BarChart3, LayoutDashboard, PlusCircle } from "lucide-react";
+import { supabaseBrowser } from "@/lib/supabase/client";
 
 export default function DashboardPage() {
+  useEffect(() => {
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabaseBrowser.auth.getUser();
+      console.log(user);
+    };
+
+    getUser();
+  }, []);
+
   return (
     <section>
       <div className="max-w-6xl mx-auto space-y-10 md:space-y-12">

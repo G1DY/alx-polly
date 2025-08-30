@@ -1,10 +1,21 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { BarChart3, PlusCircle } from "lucide-react";
+import { supabaseBrowser } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 export function SiteNavbar() {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await supabaseBrowser.auth.signOut();
+    router.push("/login");
+  };
+
   return (
-    <nav className="sticky top-0 z-50 flex h-14 items-center justify-between rounded-xl border border-border bg-background/80 backdrop-blur px-4 md:px-6 shadow-md">
+    <nav className="sticky top-0 z-50 flex h-14 items-center justify-between rounded-xl border border-border bg-background/80 backdrop-blur px-4 md:px_6 shadow-md">
       <div className="flex items-center gap-2 font-bold text-lg tracking-tight">
         <BarChart3 className="h-5 w-5 text-primary" />
         <Link
@@ -35,6 +46,7 @@ export function SiteNavbar() {
         type="button"
         aria-label="Open account menu"
         className="h-9 w-9 rounded-full bg-gradient-to-br from-primary to-primary/70 text-white grid place-items-center text-sm font-semibold shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+        onClick={handleLogout}
       >
         U
       </button>
