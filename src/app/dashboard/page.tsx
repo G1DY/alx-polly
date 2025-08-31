@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -10,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BarChart3, LayoutDashboard, PlusCircle } from "lucide-react";
+import { LayoutDashboard } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 export default function DashboardPage() {

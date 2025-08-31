@@ -12,7 +12,6 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function SignupPage() {
@@ -20,7 +19,6 @@ export default function SignupPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const router = useRouter();
   const supabase = createClient();
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {

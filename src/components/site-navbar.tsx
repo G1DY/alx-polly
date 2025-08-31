@@ -1,78 +1,95 @@
 "use client";
 
 import Link from "next/link";
-
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
+import { Button } from "@/components/ui/button";
+import { LogOut, PlusCircle, User as UserIcon } from "lucide-react";
 
 export default function SiteNavbar() {
   const [user, setUser] = useState<User | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
-    const getUser = async () => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    // Fetch initial user session
+    const getInitialUser = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
       setUser(user);
     };
-    getUser();
+    getInitialUser();
+
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
   }, [supabase.auth]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    setUser(null);
   };
 
   return (
-    <nav className="bg-white shadow-md">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between py-4">
-          <Link href="/" className="text-2xl font-bold text-gray-800">
-            Polly
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-14 max-w-screen-2xl items-center">
+        <div className="flex items-center">
+          <Link href="/" className="mr-6 flex items-center space-x-2">
+            <span className="font-bold">Polly</span>
           </Link>
-          <div className="flex items-center">
-            {user ? (
-              <>
-                <Link
-                  href="/dashboard"
-                  className="mr-4 text-gray-600 hover:text-gray-800"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  href="/polls/create"
-                  className="mr-4 text-gray-600 hover:text-gray-800"
-                >
-                  Create Poll
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/login"
-                  className="mr-4 text-gray-600 hover:text-gray-800"
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/signup"
-                  className="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-                >
-                  Sign Up
-                </Link>
-              </>
-            )}
-          </div>
+        </div>
+
+        <div className="flex flex-1 items-center justify-center">
+          {user && (
+            <nav className="flex items-center space-x-4 lg:space-x-6">
+              <Link
+                href="/dashboard"
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+              >
+                Dashboard
+              </Link>
+              <Link
+                href="/polls/create"
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+              >
+                Create Poll
+              </Link>
+            </nav>
+          )}
+        </div>
+
+        <div className="flex items-center space-x-4">
+          {user ? (
+            <>
+              <span className="text-sm text-muted-foreground hidden sm:inline-block">
+                {user.email}
+              </span>
+              <Button variant="secondary" size="sm" onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" /> Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link href="/login">
+                <Button variant="ghost" size="sm">
+                  <UserIcon className="mr-2 h-4 w-4" /> Login
+                </Button>
+              </Link>
+              <Link href="/signup">
+                <Button size="sm">
+                  <PlusCircle className="mr-2 h-4 w-4" /> Sign Up
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
-    </nav>
+    </header>
   );
 }
