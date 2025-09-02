@@ -75,7 +75,8 @@ export default function CreatePollPage() {
       return;
     }
 
-    router.push(`/polls/${poll.id}`);
+    router.push("/dashboard");
+    router.refresh();
   };
 
   return (
