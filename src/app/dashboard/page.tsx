@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -11,18 +11,34 @@ import {
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { Poll } from "@/types/poll";
+import Link from "next/link";
 
 export default function DashboardPage() {
+  const [polls, setPolls] = useState<Poll[]>([]);
+
   useEffect(() => {
     const supabase = createClient();
-    const getUser = async () => {
+    const getUserPolls = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      console.log(user);
+
+      if (user) {
+        const { data: polls, error } = await supabase
+          .from("polls")
+          .select("*, poll_options(*)")
+          .eq("user_id", user.id);
+
+        if (error) {
+          console.error("Error fetching polls:", error);
+        } else {
+          setPolls(polls as Poll[]);
+        }
+      }
     };
 
-    getUser();
+    getUserPolls();
   }, []);
 
   return (
@@ -30,167 +46,36 @@ export default function DashboardPage() {
       <div className="max-w-6xl mx-auto space-y-10 md:space-y-12">
         {/* Dashboard Content */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <Card className="hover:shadow-lg transition-shadow border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-foreground">
-                <LayoutDashboard className="h-5 w-5 text-primary" />
-                Best Backend Frameworks
-              </CardTitle>
-              <CardDescription>Vote for your favorite</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="text-sm space-y-2">
-                <li className="flex justify-between items-center">
-                  Node.js (Express/NestJS)
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    aria-label="Vote for Node.js"
-                  >
-                    Vote
-                  </Button>
-                </li>
-                <li className="flex justify-between items-center">
-                  Django
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    aria-label="Vote for Django"
-                  >
-                    Vote
-                  </Button>
-                </li>
-                <li className="flex justify-between items-center">
-                  Laravel
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    aria-label="Vote for Laravel"
-                  >
-                    Vote
-                  </Button>
-                </li>
-                <li className="flex justify-between items-center">
-                  Spring Boot
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    aria-label="Vote for Spring Boot"
-                  >
-                    Vote
-                  </Button>
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-foreground">
-                <LayoutDashboard className="h-5 w-5 text-primary" />
-                Best Frontend Frameworks
-              </CardTitle>
-              <CardDescription>Pick your top choice</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="text-sm space-y-2">
-                <li className="flex justify-between items-center">
-                  React
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    aria-label="Vote for React"
-                  >
-                    Vote
-                  </Button>
-                </li>
-                <li className="flex justify-between items-center">
-                  Vue
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    aria-label="Vote for Vue"
-                  >
-                    Vote
-                  </Button>
-                </li>
-                <li className="flex justify-between items-center">
-                  Angular
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    aria-label="Vote for Angular"
-                  >
-                    Vote
-                  </Button>
-                </li>
-                <li className="flex justify-between items-center">
-                  Svelte
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    aria-label="Vote for Svelte"
-                  >
-                    Vote
-                  </Button>
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-foreground">
-                <LayoutDashboard className="h-5 w-5 text-primary" />
-                Best Databases
-              </CardTitle>
-              <CardDescription>Relational or NoSQL?</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="text-sm space-y-2">
-                <li className="flex justify-between items-center">
-                  PostgreSQL
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    aria-label="Vote for PostgreSQL"
-                  >
-                    Vote
-                  </Button>
-                </li>
-                <li className="flex justify-between items-center">
-                  MySQL
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    aria-label="Vote for MySQL"
-                  >
-                    Vote
-                  </Button>
-                </li>
-                <li className="flex justify-between items-center">
-                  MongoDB
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    aria-label="Vote for MongoDB"
-                  >
-                    Vote
-                  </Button>
-                </li>
-                <li className="flex justify-between items-center">
-                  SQLite
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    aria-label="Vote for SQLite"
-                  >
-                    Vote
-                  </Button>
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
+          {polls.map((poll) => (
+            <Card
+              key={poll.id}
+              className="hover:shadow-lg transition-shadow border-border"
+            >
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-foreground">
+                  <LayoutDashboard className="h-5 w-5 text-primary" />
+                  {poll.question}
+                </CardTitle>
+                <CardDescription>
+                  <Link href={`/polls/${poll.id}`}>
+                    <Button variant="link">View Poll</Button>
+                  </Link>
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="text-sm space-y-2">
+                  {poll.poll_options.map((option) => (
+                    <li
+                      key={option.id}
+                      className="flex justify-between items-center"
+                    >
+                      {option.text}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     </section>
