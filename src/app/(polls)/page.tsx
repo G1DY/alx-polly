@@ -18,22 +18,26 @@ export default async function PollsListPage() {
   return (
     <section className="py-10">
       <h1 className="text-2xl font-bold mb-4">Polls</h1>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {(polls as Poll[])?.map((poll) => (
-          <Link
-            href={`/polls/${poll.id}`}
-            key={poll.id}
-            className="border p-4 rounded-lg hover:shadow-lg transition-shadow"
-          >
-            <h2 className="font-bold">{poll.question}</h2>
-            <ul className="text-sm space-y-2 mt-2">
-              {poll.poll_options.map((option) => (
-                <li key={option.id}>{option.text}</li>
-              ))}
-            </ul>
-          </Link>
-        ))}
-      </div>
+      {polls && polls.length > 0 ? (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {(polls as Poll[])?.map((poll) => (
+            <Link
+              href={`/polls/${poll.id}`}
+              key={poll.id}
+              className="border p-4 rounded-lg hover:shadow-lg transition-shadow"
+            >
+              <h2 className="font-bold">{poll.question}</h2>
+              <ul className="text-sm space-y-2 mt-2">
+                {poll.poll_options.map((option) => (
+                  <li key={option.id}>{option.text}</li>
+                ))}
+              </ul>
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <p className="text-muted-foreground">No polls found.</p>
+      )}
     </section>
   );
 }

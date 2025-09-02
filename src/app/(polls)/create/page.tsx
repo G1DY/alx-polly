@@ -58,6 +58,8 @@ export default function CreatePollPage() {
       return;
     }
 
+    console.log("Created poll:", poll);
+
     // 2. Create the poll options
     const pollOptions = options
       .filter((option) => option.trim() !== "")
