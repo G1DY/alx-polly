@@ -5,7 +5,7 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 export default async function PollsListPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: polls, error } = await supabase
     .from("polls")
     .select("*, poll_options(*)")
