@@ -13,6 +13,12 @@ export default async function PollsListPage() {
 
   if (error) {
     console.error("Error fetching polls:", error);
+    return (
+      <section className="py-10">
+        <h1 className="text-2xl font-bold mb-4">Polls</h1>
+        <p className="text-red-500">Error fetching polls: {error.message}</p>
+      </section>
+    );
   }
 
   return (

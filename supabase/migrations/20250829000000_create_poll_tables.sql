@@ -27,3 +27,7 @@ CREATE TABLE votes (
 ALTER TABLE polls ENABLE ROW LEVEL SECURITY;
 ALTER TABLE poll_options ENABLE ROW LEVEL SECURITY;
 ALTER TABLE votes ENABLE ROW LEVEL SECURITY;
+
+-- Policies
+CREATE POLICY "Allow all users to see all polls" ON polls FOR SELECT USING (true);
+CREATE POLICY "Allow all users to see all poll options" ON poll_options FOR SELECT USING (true);
