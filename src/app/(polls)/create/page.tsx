@@ -1,12 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
@@ -17,6 +12,8 @@ export default function CreatePollPage() {
   const router = useRouter();
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState(["", ""]);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleOptionChange = (index: number, value: string) => {
     const newOptions = [...options];
@@ -35,6 +32,8 @@ export default function CreatePollPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setErrorMessage("");
+    setLoading(true);
 
     const supabase = createClient();
     const {
@@ -42,23 +41,30 @@ export default function CreatePollPage() {
     } = await supabase.auth.getUser();
 
     if (!user) {
+      console.warn("No user found, redirecting to login.");
       router.push("/login");
       return;
     }
+    console.log("Current user:", user);
 
     // 1. Create the poll
     const { data: poll, error: pollError } = await supabase
       .from("polls")
-      .insert({ question, user_id: user.id })
+      .insert({ question, created_by: user?.id as string })
       .select()
       .single();
 
     if (pollError) {
-      console.error("Error creating poll:", pollError);
+      console.error("Poll insert error:", JSON.stringify(pollError, null, 2));
+      setErrorMessage(
+        pollError.message || "Failed to create poll. Please try again."
+      );
+      setLoading(false);
       return;
     }
 
     console.log("Created poll:", poll);
+    console.error("Poll insert error:", pollError);
 
     // 2. Create the poll options
     const pollOptions = options
@@ -73,7 +79,14 @@ export default function CreatePollPage() {
       .insert(pollOptions);
 
     if (optionsError) {
-      console.error("Error creating poll options:", optionsError);
+      console.error(
+        "poll_options insert error:",
+        JSON.stringify(optionsError, null, 2)
+      );
+      setErrorMessage(
+        optionsError.message || "Failed to create poll. Please try again."
+      );
+      setLoading(false);
       return;
     }
 
@@ -108,7 +121,9 @@ export default function CreatePollPage() {
                       id={`option-${index}`}
                       placeholder={`Option ${index + 1}`}
                       value={option}
-                      onChange={(e) => handleOptionChange(index, e.target.value)}
+                      onChange={(e) =>
+                        handleOptionChange(index, e.target.value)
+                      }
                       required
                     />
                     {options.length > 2 && (
@@ -124,11 +139,17 @@ export default function CreatePollPage() {
                 </div>
               ))}
             </div>
+            {/* Error message */}
+            {errorMessage && (
+              <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
+            )}
             <div className="flex justify-between mt-4">
               <Button type="button" variant="secondary" onClick={addOption}>
                 Add Option
               </Button>
-              <Button type="submit">Create Poll</Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? "Creating..." : "Create Poll"}
+              </Button>
             </div>
           </form>
         </CardContent>
