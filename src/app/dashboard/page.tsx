@@ -1,113 +1,88 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/server";
+import { Poll } from "@/types/poll";
+import { notFound } from "next/navigation";
+import { DeletePollButton } from "../../components/delete-poll-button";
 
-type PollOption = {
-  id: string;
-  text: string;
-  poll_id: string;
-};
+export default async function DashboardPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-type Poll = {
-  id: string;
-  question: string;
-  created_by: string;
-  poll_options: PollOption[];
-};
-
-export default function DashboardPage() {
-  const [polls, setPolls] = useState<Poll[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const supabase = createClient();
-
-    const fetchPolls = async () => {
-      setLoading(true);
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        console.warn("No user found, skipping fetch.");
-        setLoading(false);
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from("polls")
-        .select("*, poll_options(*)")
-        .eq("user_id", user.id);
-
-      if (error) {
-        console.error("Error fetching polls:", error);
-      } else {
-        setPolls(data || []);
-      }
-
-      setLoading(false);
-    };
-
-    fetchPolls();
-  }, []);
-
-  if (loading) {
-    return <p className="text-center py-10">Loading polls...</p>;
+  if (!user) {
+    notFound();
   }
 
-  if (polls.length === 0) {
-    return <p className="text-center py-10">No polls yet. Create one!</p>;
+  const { data: pollsData, error } = await supabase
+    .from("polls")
+    .select("*, poll_options(*)")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching polls:", error);
+    // Handle error appropriately
   }
+
+  const polls: Poll[] = pollsData || [];
 
   return (
-    <section>
-      <div className="max-w-6xl mx-auto space-y-10 md:space-y-12">
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <section className="py-10">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">My Polls</h1>
+        <Button asChild>
+          <Link href="/polls/create">Create Poll</Link>
+        </Button>
+      </div>
+
+      {polls.length > 0 ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {polls.map((poll) => (
-            <Card
-              key={poll.id}
-              className="hover:shadow-lg transition-shadow border-border"
-            >
+            <Card key={poll.id}>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-foreground">
-                  <LayoutDashboard className="h-5 w-5 text-primary" />
-                  {poll.question}
-                </CardTitle>
-                <CardDescription>Vote for your favorite option</CardDescription>
+                <CardTitle>{poll.question}</CardTitle>
               </CardHeader>
               <CardContent>
-                <ul className="text-sm space-y-2">
+                <ul className="list-disc pl-5">
                   {poll.poll_options.map((option) => (
-                    <li
-                      key={option.id}
-                      className="flex justify-between items-center"
-                    >
-                      {option.text}
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        aria-label={`Vote for ${option.text}`}
-                      >
-                        Vote
-                      </Button>
-                    </li>
+                    <li key={option.id}>{option.text}</li>
                   ))}
                 </ul>
               </CardContent>
+              <CardFooter className="flex justify-between">
+                <Button asChild variant="secondary">
+                  <Link href={`/polls/${poll.id}`}>View Results</Link>
+                </Button>
+                <DeletePollButton pollId={poll.id} />
+              </CardFooter>
             </Card>
           ))}
         </div>
-      </div>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>No polls yet</CardTitle>
+            <CardDescription>
+              Create your first poll to get started.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href="/polls/create">Create a Poll</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </section>
   );
 }

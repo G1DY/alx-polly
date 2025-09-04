@@ -7,7 +7,10 @@ export type PollOption = {
 export type Poll = {
   id: string;
   question: string;
-  poll_options: PollOption[];
+  poll_options: {
+    id: string;
+    text: string;
+  }[];
   created_at: string;
   user_id: string;
 };
