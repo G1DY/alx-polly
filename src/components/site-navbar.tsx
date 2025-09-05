@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut, PlusCircle, User as UserIcon, Menu } from "lucide-react";
 import { FaPoll } from "react-icons/fa";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 
 export default function SiteNavbar() {
   const [user, setUser] = useState<User | null>(null);
@@ -71,10 +72,16 @@ export default function SiteNavbar() {
           {/* Auth buttons */}
           {user ? (
             <>
-              <span className="hidden sm:inline text-sm text-muted-foreground">
-                {/* {user.email} */}
-                <UserIcon className="h-5 w-5 text-muted-foreground" />
-              </span>
+              {/* Avatar instead of full email */}
+              <Avatar className="h-8 w-8">
+                <AvatarImage
+                  src={user.user_metadata?.avatar_url}
+                  alt={user.email || "user"}
+                />
+                <AvatarFallback>
+                  {user.email ? user.email[0].toUpperCase() : "U"}
+                </AvatarFallback>
+              </Avatar>
               <Button variant="secondary" size="sm" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" /> Logout
               </Button>
