@@ -6,7 +6,9 @@ import { useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { LogOut, PlusCircle, User as UserIcon } from "lucide-react";
+import { LogOut, PlusCircle, User as UserIcon, Menu } from "lucide-react";
+import { FaPoll } from "react-icons/fa";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export default function SiteNavbar() {
   const [user, setUser] = useState<User | null>(null);
@@ -20,7 +22,6 @@ export default function SiteNavbar() {
       }
     );
 
-    // Fetch initial user session
     const getInitialUser = async () => {
       const {
         data: { user },
@@ -36,17 +37,21 @@ export default function SiteNavbar() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    setUser(null); // immediately update UI
+    setUser(null);
     router.push("/login");
   };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 max-w-screen-2xl items-center">
-        <nav className="flex items-center space-x-4 lg:space-x-6">
-          <Link href="/" className="mr-6 flex items-center space-x-2">
-            <span className="font-bold">Polly</span>
-          </Link>
+      <div className="container flex h-14 max-w-screen-2xl items-center justify-between">
+        {/* Left: Logo */}
+        <Link href="/" className="ml-16 mr-6 flex items-center space-x-2">
+          <FaPoll className="h-5 w-5 text-primary" />
+          <span className="font-bold">AlxPolly</span>
+        </Link>
+
+        {/* Center: Nav links (hidden on mobile, flex on md+) */}
+        <div className="hidden md:flex flex-1 items-center justify-center space-x-6">
           <Link
             href="/dashboard"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
@@ -59,11 +64,14 @@ export default function SiteNavbar() {
           >
             Create Poll
           </Link>
-        </nav>
-        <div className="flex flex-1 items-center justify-end space-x-4">
+        </div>
+
+        {/* Right: Auth + Hamburger for mobile */}
+        <div className="flex items-center space-x-2">
+          {/* Auth buttons */}
           {user ? (
             <>
-              <span className="text-sm text-muted-foreground">
+              <span className="hidden sm:inline text-sm text-muted-foreground">
                 {user.email}
               </span>
               <Button variant="secondary" size="sm" onClick={handleLogout}>
@@ -84,6 +92,29 @@ export default function SiteNavbar() {
               </Link>
             </>
           )}
+
+          {/* Hamburger menu (mobile only) */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="flex flex-col space-y-4 mt-8">
+              <Link
+                href="/dashboard"
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+              >
+                Dashboard
+              </Link>
+              <Link
+                href="/polls/create"
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+              >
+                Create Poll
+              </Link>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>
