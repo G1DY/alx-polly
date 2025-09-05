@@ -8,8 +8,41 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BarChart3, Users, Vote, CheckCircle, Star } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
 
-export default function LandingPage() {
+function formatNumber(num: number): string {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
+  }
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1).replace(/\.0$/, "") + "K";
+  }
+  return num.toString();
+}
+
+export default async function LandingPage() {
+  const supabase = await createClient();
+
+  const { count: pollsCount } = await supabase
+    .from("polls")
+    .select("*", { count: "exact", head: true });
+
+  const { count: votesCount } = await supabase
+    .from("votes")
+    .select("*", { count: "exact", head: true });
+
+  const { data: usersData, error: usersError } = await supabase.rpc(
+    "get_active_users_count"
+  );
+
+  const activeUsersCount = usersData ? usersData : 0;
+
+  // ✅ Check user session
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const isLoggedIn = !!user;
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -173,15 +206,21 @@ export default function LandingPage() {
         <div className="container mx-auto max-w-4xl">
           <div className="grid md:grid-cols-3 gap-8 text-center">
             <div className="space-y-2">
-              <div className="text-4xl font-bold text-accent">10K+</div>
+              <div className="text-4xl font-bold text-accent">
+                {formatNumber(pollsCount ?? 0)}+
+              </div>
               <div className="text-muted-foreground">Polls Created</div>
             </div>
             <div className="space-y-2">
-              <div className="text-4xl font-bold text-secondary">50K+</div>
+              <div className="text-4xl font-bold text-secondary">
+                {formatNumber(votesCount ?? 0)}+
+              </div>
               <div className="text-muted-foreground">Votes Cast</div>
             </div>
             <div className="space-y-2">
-              <div className="text-4xl font-bold text-chart-2">2K+</div>
+              <div className="text-4xl font-bold text-chart-2">
+                {formatNumber(activeUsersCount ?? 0)}+
+              </div>
               <div className="text-muted-foreground">Active Users</div>
             </div>
           </div>
@@ -218,7 +257,7 @@ export default function LandingPage() {
                     <span className="text-sm font-medium text-accent">SM</span>
                   </div>
                   <div>
-                    <div className="font-medium">Sarah Miller</div>
+                    <div className="font-medium">O'Brian Nyamor</div>
                     <div className="text-sm text-muted-foreground">
                       Product Manager
                     </div>
@@ -246,9 +285,9 @@ export default function LandingPage() {
                     </span>
                   </div>
                   <div>
-                    <div className="font-medium">John Davis</div>
+                    <div className="font-medium">Jogli Kibii</div>
                     <div className="text-sm text-muted-foreground">
-                      Team Lead
+                      CTO, Tech Solutions
                     </div>
                   </div>
                 </div>
@@ -272,7 +311,7 @@ export default function LandingPage() {
                     <span className="text-sm font-medium text-chart-2">AL</span>
                   </div>
                   <div>
-                    <div className="font-medium">Alex Lee</div>
+                    <div className="font-medium">Victor Yegon</div>
                     <div className="text-sm text-muted-foreground">
                       Community Manager
                     </div>
@@ -296,22 +335,35 @@ export default function LandingPage() {
             polling made simple.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              asChild
-              size="lg"
-              variant="secondary"
-              className="text-lg px-8"
-            >
-              <Link href="/signup">Sign Up Now</Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="text-lg px-8 bg-white/10 border-white/20 text-white hover:bg-white/20"
-            >
-              <Link href="/login">Already have an account?</Link>
-            </Button>
+            {isLoggedIn ? (
+              <>
+                <Button asChild size="lg" className="text-lg px-8">
+                  <Link href="/dashboard">Go to Dashboard</Link>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  className="text-lg px-8 bg-transparent"
+                >
+                  <Link href="/polls">View Live Polls</Link>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button asChild size="lg" className="text-lg px-8">
+                  <Link href="/signup">Get Started Free</Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className="text-lg px-8 bg-transparent"
+                >
+                  <Link href="/login">Already have an account?</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </section>
