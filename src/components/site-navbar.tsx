@@ -72,7 +72,8 @@ export default function SiteNavbar() {
           {user ? (
             <>
               <span className="hidden sm:inline text-sm text-muted-foreground">
-                {user.email}
+                {/* {user.email} */}
+                <UserIcon className="h-5 w-5 text-muted-foreground" />
               </span>
               <Button variant="secondary" size="sm" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" /> Logout
