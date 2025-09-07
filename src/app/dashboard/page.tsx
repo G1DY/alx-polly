@@ -14,7 +14,7 @@ import { notFound } from "next/navigation";
 import { DeletePollButton } from "../../components/delete-poll-button";
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
+  const supabase = createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
