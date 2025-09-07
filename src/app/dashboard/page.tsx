@@ -14,7 +14,7 @@ import { notFound } from "next/navigation";
 import { DeletePollButton } from "../../components/delete-poll-button";
 
 export default async function DashboardPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -26,7 +26,7 @@ export default async function DashboardPage() {
   const { data: pollsData, error } = await supabase
     .from("polls")
     .select("*, poll_options(*)")
-    .eq("user_id", user.id)
+    .eq("created_by", user.id)
     .order("created_at", { ascending: false });
 
   if (error) {
