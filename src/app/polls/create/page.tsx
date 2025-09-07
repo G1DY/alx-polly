@@ -1,6 +1,5 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 import {
   Card,
   CardContent,
@@ -11,57 +10,25 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { createClient } from "@/lib/supabase/client";
+import { createPoll } from "./actions";
 
 export default function CreatePollPage() {
-  const router = useRouter();
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState<string[]>(["", ""]);
-  const [isCreating, setIsCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
-  const handleCreatePoll = async () => {
-    setIsCreating(true);
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError(null);
 
-    if (!user) {
-      // Handle the case where the user is not authenticated
-      setIsCreating(false);
-      return;
-    }
-
-    // 1. Create the poll
-    const { data: poll, error: pollError } = await supabase
-      .from("polls")
-      .insert({ question, user_id: user.id })
-      .select()
-      .single();
-
-    if (pollError) {
-      console.error("Error creating poll:", pollError);
-      setIsCreating(false);
-      return;
-    }
-
-    // 2. Create the poll options
-    const { error: optionsError } = await supabase.from("poll_options").insert(
-      options
-        .filter((opt) => opt.trim() !== "")
-        .map((opt) => ({
-          text: opt,
-          poll_id: poll.id,
-        })),
-    );
-
-    if (optionsError) {
-      console.error("Error creating poll options:", optionsError);
-      // Handle the error, e.g., by deleting the created poll
-    } else {
-      router.push(`/polls/${poll.id}`);
-    }
-    setIsCreating(false);
+    const formData = new FormData(event.currentTarget);
+    startTransition(async () => {
+      const result = await createPoll(formData);
+      if (result?.error) {
+        setError(result.error);
+      }
+    });
   };
 
   return (
@@ -71,49 +38,54 @@ export default function CreatePollPage() {
           <CardTitle>Create a Poll</CardTitle>
           <CardDescription>Ask a question and add options.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="question">Question</Label>
-            <Input
-              id="question"
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              placeholder="What's your question?"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Options</Label>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              {options.map((opt, idx) => (
-                <Input
-                  key={idx}
-                  value={opt}
-                  placeholder={`Option ${idx + 1}`}
-                  onChange={(e) =>
-                    setOptions((prev) =>
-                      prev.map((o, i) => (i === idx ? e.target.value : o)),
-                    )
-                  }
-                />
-              ))}
+              <Label htmlFor="question">Question</Label>
+              <Input
+                id="question"
+                name="question"
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                placeholder="What's your question?"
+                required
+              />
             </div>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => setOptions((prev) => [...prev, ""])}
-            >
-              Add option
-            </Button>
-          </div>
 
-          <Button
-            type="button"
-            onClick={handleCreatePoll}
-            disabled={isCreating}
-          >
-            {isCreating ? "Creating..." : "Create"}
-          </Button>
+            <div className="space-y-2">
+              <Label>Options</Label>
+              <div className="space-y-2">
+                {options.map((opt, idx) => (
+                  <Input
+                    key={idx}
+                    name="options"
+                    value={opt}
+                    placeholder={`Option ${idx + 1}`}
+                    onChange={(e) =>
+                      setOptions((prev) =>
+                        prev.map((o, i) => (i === idx ? e.target.value : o)),
+                      )
+                    }
+                  />
+                ))}
+              </div>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setOptions((prev) => [...prev, ""])}
+              >
+                Add option
+              </Button>
+            </div>
+
+            {error && (
+              <p className="text-sm font-medium text-red-500">{error}</p>
+            )}
+
+            <Button type="submit" disabled={isPending}>
+              {isPending ? "Creating..." : "Create Poll"}
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </section>
