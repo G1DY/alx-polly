@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function createPoll(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },
@@ -30,7 +30,7 @@ export async function createPoll(formData: FormData) {
   // 1. Create the poll
   const { data: poll, error: pollError } = await supabase
     .from("polls")
-    .insert({ question, user_id: user.id })
+    .insert({ question, created_by: user.id })
     .select()
     .single();
 
