@@ -16,7 +16,7 @@ type Props = { params: { pollId: string } };
 
 export default async function PollDetailsPage({ params }: Props) {
   const { pollId } = params;
-  const supabase = createClient();
+  const supabase = await createClient();
   const headersList = headers();
   const host = headersList.get("host") || "";
   const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
